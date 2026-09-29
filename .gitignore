@@ -1,0 +1,23 @@
+# Maven build output
+target/
+
+# SQLite database
+helpdesk.db
+*.db-journal
+*.db-shm
+*.db-wal
+
+# Eclipse
+.metadata/
+.settings/
+.classpath
+.project
+
+# macOS
+.DS_Store
+
+# Java
+*.class
+
+# Logs
+*.log
