@@ -1322,6 +1322,37 @@ public class Main extends Application {
                 return;
 
             }
+            
+         // Validate ticket title length.
+            if (title.length() < 3
+                    || title.length() > 100) {
+
+                showAlert(
+                        Alert.AlertType.WARNING,
+                        "Invalid Ticket",
+                        "Invalid title length",
+                        "The ticket title must be between 3 and 100 characters."
+                );
+
+                return;
+            }
+
+
+            // Validate ticket description length.
+            if (description.length() < 10
+                    || description.length() > 1000) {
+
+                showAlert(
+                        Alert.AlertType.WARNING,
+                        "Invalid Ticket",
+                        "Invalid description length",
+                        "The ticket description must be between 10 and 1000 characters."
+                );
+
+                return;
+            }
+
+
 
             Ticket ticketToSave =
 
@@ -1904,6 +1935,32 @@ public class Main extends Application {
                 return;
 
             }
+            
+         // Validate ticket title length.
+            if (title.length() < 3 || title.length() > 100) {
+
+                showAlert(
+                        Alert.AlertType.WARNING,
+                        "Invalid Ticket",
+                        "Invalid title length",
+                        "The ticket title must be between 3 and 100 characters."
+                );
+
+                return;
+            }
+
+            // Validate ticket description length.
+            if (description.length() < 10 || description.length() > 1000) {
+
+                showAlert(
+                        Alert.AlertType.WARNING,
+                        "Invalid Ticket",
+                        "Invalid description length",
+                        "The ticket description must be between 10 and 1000 characters."
+                );
+
+                return;
+            }
 
             if (!isValidStatusTransition(
 
@@ -2454,6 +2511,25 @@ public class Main extends Application {
         commentArea.setWrapText(true);
 
         commentArea.setPrefRowCount(3);
+        Label commentCounter = new Label("0 / 2000 characters");
+
+        commentArea.textProperty().addListener(
+                (observable, oldValue, newValue) -> {
+                    int count = newValue.length();
+
+                    commentCounter.setText(
+                            count + " / 2000 characters"
+                    );
+
+                    if (count > 2000) {
+                        commentCounter.setStyle("-fx-text-fill: red;");
+                    } else if (count >= 1800) {
+                        commentCounter.setStyle("-fx-text-fill: orange;");
+                    } else {
+                        commentCounter.setStyle("-fx-text-fill: gray;");
+                    }
+                }
+        );
 
         Button addCommentButton =
 
@@ -2499,6 +2575,16 @@ public class Main extends Application {
 
                 return;
 
+            }
+            
+            if (commentText.length() > 2000) {
+                showAlert(
+                        Alert.AlertType.WARNING,
+                        "Invalid Comment",
+                        "Comment is too long",
+                        "Comments cannot exceed 2,000 characters."
+                );
+                return;
             }
 
             if (currentUser == null) {
@@ -2630,7 +2716,7 @@ public class Main extends Application {
                 commentsScrollPane,
 
                 commentArea,
-
+                commentCounter,
                 commentButtons
 
         );
