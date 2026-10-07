@@ -85,17 +85,32 @@ public class Main extends Application {
             new UserRepository();
 
     private final TicketCommentRepository commentRepository =
-
             new TicketCommentRepository();
 
     private Stage primaryStage;
 
     private User currentUser;
 
+
+    // Dashboard statistic labels
+    private final Label totalTicketsLabel =
+            new Label();
+
+    private final Label openTicketsLabel =
+            new Label();
+
+    private final Label inProgressTicketsLabel =
+            new Label();
+
+    private final Label resolvedTicketsLabel =
+            new Label();
+
+    private final Label closedTicketsLabel =
+            new Label();
+
+
     /* Override */
-
     public void start(Stage stage) {
-
         primaryStage = stage;
 
         DatabaseManager.initializeDatabase();
@@ -573,6 +588,8 @@ public class Main extends Application {
         statusFilterBox.setValue(
                 "All Statuses"
         );
+        
+        
 
         TableView<Ticket> ticketTable =
 
@@ -1048,6 +1065,32 @@ public class Main extends Application {
         searchBar.setAlignment(
                 Pos.CENTER_LEFT
         );
+        
+        HBox statisticsBar =
+                new HBox(
+                        25,
+                        totalTicketsLabel,
+                        openTicketsLabel,
+                        inProgressTicketsLabel,
+                        resolvedTicketsLabel,
+                        closedTicketsLabel
+                );
+
+        statisticsBar.setAlignment(
+                Pos.CENTER_LEFT
+        );
+        
+        updateDashboardStatistics();
+        
+     // Automatically update statistics when
+     // the ticket list changes.
+     tickets.addListener(
+             (javafx.collections.ListChangeListener<Ticket>) change -> {
+
+                 updateDashboardStatistics();
+             }
+     );
+
 
 
         VBox header =
@@ -1079,6 +1122,8 @@ public class Main extends Application {
                 permissionLabel,
 
                 searchBar,
+                
+                statisticsBar,
 
                 buttonBar
 
@@ -1985,17 +2030,19 @@ public class Main extends Application {
             );
 
             ticket.setAssignedTo(
-
                     assignedTo
-
             );
 
             ticketTable.refresh();
 
+
+            // Recalculate dashboard statistics after
+            // an existing ticket is updated.
+            updateDashboardStatistics();
+
+
             ticketTable
-
                     .getSelectionModel()
-
                     .clearSelection();
 
             updateStage.close();
@@ -2858,6 +2905,68 @@ public class Main extends Application {
 
         };
 
+    }
+    
+    /**
+     * Updates the ticket statistics displayed
+     * on the dashboard.
+     */
+    private void updateDashboardStatistics() {
+
+        long total =
+                tickets.size();
+
+        long open =
+                tickets.stream()
+                        .filter(ticket ->
+                                "Open".equals(
+                                        ticket.getStatus()
+                                ))
+                        .count();
+
+        long inProgress =
+                tickets.stream()
+                        .filter(ticket ->
+                                "In Progress".equals(
+                                        ticket.getStatus()
+                                ))
+                        .count();
+
+        long resolved =
+                tickets.stream()
+                        .filter(ticket ->
+                                "Resolved".equals(
+                                        ticket.getStatus()
+                                ))
+                        .count();
+
+        long closed =
+                tickets.stream()
+                        .filter(ticket ->
+                                "Closed".equals(
+                                        ticket.getStatus()
+                                ))
+                        .count();
+
+        totalTicketsLabel.setText(
+                "Total Tickets: " + total
+        );
+
+        openTicketsLabel.setText(
+                "Open: " + open
+        );
+
+        inProgressTicketsLabel.setText(
+                "In Progress: " + inProgress
+        );
+
+        resolvedTicketsLabel.setText(
+                "Resolved: " + resolved
+        );
+
+        closedTicketsLabel.setText(
+                "Closed: " + closed
+        );
     }
     
     /**
