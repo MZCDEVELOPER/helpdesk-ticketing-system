@@ -15,7 +15,6 @@ import com.helpdesk.model.TicketComment;
 public class TicketCommentRepository {
 
     public int save(TicketComment comment) {
-
         String sql = """
                 INSERT INTO ticket_comments
                 (ticket_id, user_id, comment_text, created_at)
@@ -74,9 +73,10 @@ public class TicketCommentRepository {
         } catch (SQLException e) {
 
             System.err.println(
-                    "Error saving comment: "
-                            + e.getMessage()
+                    "Database error while saving comment."
             );
+
+            e.printStackTrace();
         }
 
         return -1;
@@ -84,7 +84,6 @@ public class TicketCommentRepository {
 
     public List<TicketComment> findByTicketId(
             int ticketId) {
-
         List<TicketComment> comments =
                 new ArrayList<>();
 
@@ -124,8 +123,12 @@ public class TicketCommentRepository {
         } catch (SQLException e) {
 
             System.err.println(
-                    "Error loading comments: "
-                            + e.getMessage()
+                    "Database error while loading comments."
+            );
+
+            throw new IllegalStateException(
+                    "Unable to load comments from the database.",
+                    e
             );
         }
 

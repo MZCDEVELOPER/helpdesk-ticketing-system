@@ -349,40 +349,46 @@ public class Main extends Application {
 
     private void loadTicketsForCurrentUser() {
 
-        tickets.clear();
-
         if (currentUser == null) {
-
             return;
-
         }
 
-        if (currentUser
+        try {
 
-                .getRole()
+            List<Ticket> loadedTickets;
 
-                .equals("Employee")) {
+            if (currentUser.getRole().equals("Employee")) {
 
-            tickets.addAll(
+                loadedTickets = ticketRepository.findByCreatedBy(
+                        currentUser.getId()
+                );
 
-                    ticketRepository.findByCreatedBy(
+            } else {
 
-                            currentUser.getId()
+                loadedTickets = ticketRepository.findAll();
+            }
 
-                    )
+            // Replace displayed tickets only after
+            // the database query succeeds.
+            tickets.setAll(loadedTickets);
 
+        } catch (IllegalStateException e) {
+
+            System.err.println(
+                    "Unable to refresh the ticket dashboard."
             );
 
-        } else {
+            e.printStackTrace();
 
-            tickets.addAll(
-
-                    ticketRepository.findAll()
-
+            showAlert(
+                    Alert.AlertType.ERROR,
+                    "Ticket Loading Failed",
+                    "Unable to load tickets.",
+                    "A database error occurred. "
+                    + "The previously loaded tickets "
+                    + "will remain displayed."
             );
-
         }
-
     }
 
     /* Determines whether the current user can manage tickets */
@@ -2751,19 +2757,34 @@ public class Main extends Application {
 
             VBox commentsBox) {
 
-        commentsBox
+    	List<TicketComment> comments;
 
-                .getChildren()
+    	try {
 
-                .clear();
+    	    comments = commentRepository.findByTicketId(ticketId);
 
-        List<TicketComment> comments =
+    	} catch (IllegalStateException e) {
 
-                commentRepository.findByTicketId(
+    	    System.err.println(
+    	            "Unable to refresh ticket comments."
+    	    );
 
-                        ticketId
+    	    e.printStackTrace();
 
-                );
+    	    showAlert(
+    	            Alert.AlertType.ERROR,
+    	            "Comment Loading Failed",
+    	            "Unable to load comments.",
+    	            "A database error occurred. "
+    	            + "Previously displayed comments will remain visible."
+    	    );
+
+    	    return;
+    	}
+
+    	// Clear the previous comments only after
+    	// the database query succeeds.
+    	commentsBox.getChildren().clear();
 
         if (comments.isEmpty()) {
 

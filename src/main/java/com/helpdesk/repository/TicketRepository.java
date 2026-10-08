@@ -124,9 +124,10 @@ public class TicketRepository {
         } catch (SQLException e) {
 
             System.err.println(
-                    "Unable to save ticket: "
-                    + e.getMessage()
+                    "Database error while saving ticket."
             );
+
+            e.printStackTrace();
         }
 
         return -1;
@@ -181,12 +182,15 @@ public class TicketRepository {
             System.out.println(
                     "Tickets loaded successfully."
             );
-
         } catch (SQLException e) {
 
             System.err.println(
-                    "Unable to load tickets: "
-                    + e.getMessage()
+                    "Database error while loading tickets."
+            );
+
+            throw new IllegalStateException(
+                    "Unable to load tickets from the database.",
+                    e
             );
         }
 
@@ -250,8 +254,12 @@ public class TicketRepository {
         } catch (SQLException e) {
 
             System.err.println(
-                    "Unable to load user tickets: "
-                    + e.getMessage()
+                    "Database error while loading tickets."
+            );
+
+            throw new IllegalStateException(
+                    "Unable to load tickets from the database.",
+                    e
             );
         }
 
@@ -353,9 +361,10 @@ public class TicketRepository {
         } catch (SQLException e) {
 
             System.err.println(
-                    "Unable to update ticket: "
-                    + e.getMessage()
+                    "Database error while updating ticket."
             );
+
+            e.printStackTrace();
         }
 
         return false;
