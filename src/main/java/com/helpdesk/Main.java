@@ -117,14 +117,34 @@ public class Main extends Application {
     public void start(Stage stage) {
         primaryStage = stage;
 
-        DatabaseManager.initializeDatabase();
+        try {
 
-        userRepository.createDefaultUsers();
+            DatabaseManager.initializeDatabase();
 
-        showLoginScreen();
+            userRepository.createDefaultUsers();
 
-        primaryStage.show();
+            showLoginScreen();
 
+            primaryStage.show();
+
+        } catch (IllegalStateException e) {
+
+            LOGGER.log(
+                    Level.SEVERE,
+                    "Application startup failed.",
+                    e
+            );
+
+            showAlert(
+                    Alert.AlertType.ERROR,
+                    "Startup Failed",
+                    "The application could not start.",
+                    "The database could not be initialized. "
+                    + "Please check the database configuration "
+                    + "and try again."
+            );
+
+        }
     }
 
     /* Displays the login screen */
@@ -1745,17 +1765,36 @@ public class Main extends Application {
                 );
 
         ComboBox<User> technicianBox =
-
                 new ComboBox<>();
 
-        List<User> technicians =
+        List<User> technicians;
 
-                userRepository.findTechnicians();
+        try {
+
+            technicians =
+                    userRepository.findTechnicians();
+
+        } catch (IllegalStateException e) {
+
+            LOGGER.log(
+                    Level.SEVERE,
+                    "Unable to load technicians for ticket assignment.",
+                    e
+            );
+
+            showAlert(
+                    Alert.AlertType.ERROR,
+                    "Database Error",
+                    "Unable to load technicians.",
+                    "The technician list could not be retrieved. "
+                    + "Please try opening the ticket again."
+            );
+
+            return;
+        }
 
         technicianBox.getItems().addAll(
-
                 technicians
-
         );
 
         technicianBox.setConverter(
@@ -2905,39 +2944,38 @@ public class Main extends Application {
     /* Converts a database user ID into a readable name and role */
 
     private String getUserDisplayName(
-
             int userId,
-
             String emptyValue) {
 
         if (userId == 0) {
-
             return emptyValue;
-
         }
 
-        User user =
+        try {
 
-                userRepository.findById(
+            User user =
+                    userRepository.findById(userId);
 
-                        userId
+            if (user == null) {
+                return "Unknown";
+            }
 
-                );
+            return user.getName()
+                    + " ("
+                    + user.getRole()
+                    + ")";
 
-        if (user == null) {
+        } catch (IllegalStateException e) {
 
-            return "Unknown";
+            LOGGER.log(
+                    Level.SEVERE,
+                    "Unable to retrieve display name for user ID: "
+                            + userId,
+                    e
+            );
 
+            return "Unavailable";
         }
-
-        return user.getName()
-
-                + " ("
-
-                + user.getRole()
-
-                + ")";
-
     }
 
     /*  Enforces the ticket state machine */

@@ -5,8 +5,12 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class DatabaseManager {
+	private static final Logger LOGGER =
+	        Logger.getLogger(DatabaseManager.class.getName());
 
     private static final String DB_URL =
             "jdbc:sqlite:helpdesk.db";
@@ -40,8 +44,7 @@ public class DatabaseManager {
      * migrations without deleting existing data.
      */
     public static void initializeDatabase() {
-
-        try (Connection connection = connect();
+    	try (Connection connection = connect();
              Statement statement =
                      connection.createStatement()) {
 
@@ -142,18 +145,20 @@ public class DatabaseManager {
 
             statement.execute(createCommentsTable);
 
-            System.out.println(
-                    "Database initialized successfully."
-            );
+            LOGGER.info("Database initialized successfully.");
 
         } catch (SQLException e) {
 
-            System.err.println(
-                    "Database initialization failed: "
-                    + e.getMessage()
+            LOGGER.log(
+                    Level.SEVERE,
+                    "Database initialization failed.",
+                    e
             );
 
-            e.printStackTrace();
+            throw new IllegalStateException(
+                    "Unable to initialize the application database.",
+                    e
+            );
         }
     }
 

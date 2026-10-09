@@ -109,8 +109,7 @@ public class UserRepository {
      * Finds a user by username.
      */
     public User findByUsername(String username) {
-
-        String sql = """
+    	String sql = """
                 SELECT
                     id,
                     name,
@@ -142,13 +141,18 @@ public class UserRepository {
                 }
             }
 
-        } catch (SQLException e) {
-
+        } 
+        catch (SQLException e) {
         	LOGGER.log(
-        	        Level.SEVERE,
-        	        "Database error while finding user by username.",
-        	        e
-        	);
+                    Level.SEVERE,
+                    "Database error while retrieving user.",
+                    e
+            );
+
+            throw new IllegalStateException(
+                    "Unable to retrieve user information.",
+                    e
+            );
         }
 
         return null;
@@ -201,11 +205,16 @@ public class UserRepository {
 
         } catch (SQLException e) {
 
-        	LOGGER.log(
-        	        Level.SEVERE,
-        	        "Database error while finding user by ID.",
-        	        e
-        	);
+            LOGGER.log(
+                    Level.SEVERE,
+                    "Database error while finding user by ID.",
+                    e
+            );
+
+            throw new IllegalStateException(
+                    "Unable to retrieve user information for ID: " + userId,
+                    e
+            );
         }
 
         return null;
@@ -328,13 +337,17 @@ public class UserRepository {
 
         } catch (SQLException e) {
 
-        	LOGGER.log(
-        	        Level.SEVERE,
-        	        "Database error while loading technicians.",
-        	        e
-        	);
-        }
+            LOGGER.log(
+                    Level.SEVERE,
+                    "Database error while loading technicians.",
+                    e
+            );
 
+            throw new IllegalStateException(
+                    "Unable to retrieve the technician list.",
+                    e
+            );
+        }
         return technicians;
     }
 
