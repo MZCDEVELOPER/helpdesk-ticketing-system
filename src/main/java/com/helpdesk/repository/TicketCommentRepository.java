@@ -8,11 +8,15 @@ import java.sql.Statement;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.helpdesk.database.DatabaseManager;
 import com.helpdesk.model.TicketComment;
 
 public class TicketCommentRepository {
+	private static final Logger LOGGER =
+	        Logger.getLogger(TicketCommentRepository.class.getName());
 
     public int save(TicketComment comment) {
         String sql = """
@@ -60,9 +64,10 @@ public class TicketCommentRepository {
                         int generatedId =
                                 generatedKeys.getInt(1);
 
-                        System.out.println(
-                                "Comment saved successfully. ID: "
-                                        + generatedId
+                        LOGGER.log(
+                                Level.INFO,
+                                "Comment saved successfully. ID: {0}",
+                                generatedId
                         );
 
                         return generatedId;
@@ -72,11 +77,11 @@ public class TicketCommentRepository {
 
         } catch (SQLException e) {
 
-            System.err.println(
-                    "Database error while saving comment."
+            LOGGER.log(
+                    Level.SEVERE,
+                    "Database error while saving comment.",
+                    e
             );
-
-            e.printStackTrace();
         }
 
         return -1;
@@ -119,11 +124,20 @@ public class TicketCommentRepository {
                     comments.add(comment);
                 }
             }
+            
+            // Log only after the query succeeds.
+            LOGGER.log(
+                    Level.INFO,
+                    "Comments loaded successfully for ticket ID {0}.",
+                    ticketId
+            );
 
         } catch (SQLException e) {
 
-            System.err.println(
-                    "Database error while loading comments."
+            LOGGER.log(
+                    Level.SEVERE,
+                    "Database error while loading comments.",
+                    e
             );
 
             throw new IllegalStateException(

@@ -5,6 +5,8 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.helpdesk.database.DatabaseManager;
 
@@ -71,6 +73,8 @@ import javafx.stage.Stage;
 import javafx.util.StringConverter;
 
 public class Main extends Application {
+	private static final Logger LOGGER =
+	        Logger.getLogger(Main.class.getName());
 
     private final ObservableList<Ticket> tickets =
 
@@ -263,20 +267,6 @@ public class Main extends Application {
 
                     authenticatedUser;
 
-            System.out.println(
-
-                    "Login successful: "
-
-                    + currentUser.getUsername()
-
-                    + " ("
-
-                    + currentUser.getRole()
-
-                    + ")"
-
-            );
-
             loadTicketsForCurrentUser();
 
             showDashboard();
@@ -374,11 +364,11 @@ public class Main extends Application {
 
         } catch (IllegalStateException e) {
 
-            System.err.println(
-                    "Unable to refresh the ticket dashboard."
-            );
-
-            e.printStackTrace();
+        	LOGGER.log(
+        	        Level.SEVERE,
+        	        "Unable to refresh the ticket dashboard.",
+        	        e
+        	);
 
             showAlert(
                     Alert.AlertType.ERROR,
@@ -1023,12 +1013,10 @@ public class Main extends Application {
 
         logoutButton.setOnAction(event -> {
 
-            System.out.println(
-
-                    "User logged out: "
-
-                    + currentUser.getUsername()
-
+            LOGGER.log(
+                    Level.INFO,
+                    "User logged out. ID: {0}",
+                    currentUser.getId()
             );
 
             showLoginScreen();
@@ -2765,11 +2753,11 @@ public class Main extends Application {
 
     	} catch (IllegalStateException e) {
 
-    	    System.err.println(
-    	            "Unable to refresh ticket comments."
-    	    );
-
-    	    e.printStackTrace();
+    		LOGGER.log(
+    		        Level.SEVERE,
+    		        "Unable to refresh ticket comments.",
+    		        e
+    		);
 
     	    showAlert(
     	            Alert.AlertType.ERROR,

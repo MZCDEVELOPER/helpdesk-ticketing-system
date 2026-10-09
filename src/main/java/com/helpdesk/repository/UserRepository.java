@@ -7,6 +7,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.helpdesk.database.DatabaseManager;
 import com.helpdesk.model.Administrator;
@@ -16,6 +18,8 @@ import com.helpdesk.model.User;
 import com.helpdesk.security.PasswordUtils;
 
 public class UserRepository {
+	private static final Logger LOGGER =
+	        Logger.getLogger(UserRepository.class.getName());
 
     /*
      * Saves a new user to the database.
@@ -78,9 +82,10 @@ public class UserRepository {
                         int generatedId =
                                 generatedKeys.getInt(1);
 
-                        System.out.println(
-                                "User saved successfully. ID: "
-                                        + generatedId
+                        LOGGER.log(
+                                Level.INFO,
+                                "User saved successfully. ID: {0}",
+                                generatedId
                         );
 
                         return generatedId;
@@ -90,9 +95,10 @@ public class UserRepository {
 
         } catch (SQLException e) {
 
-            System.err.println(
-                    "Error saving user: "
-                            + e.getMessage()
+            LOGGER.log(
+                    Level.SEVERE,
+                    "Database error while saving user.",
+                    e
             );
         }
 
@@ -138,10 +144,11 @@ public class UserRepository {
 
         } catch (SQLException e) {
 
-            System.err.println(
-                    "Error finding user by username: "
-                            + e.getMessage()
-            );
+        	LOGGER.log(
+        	        Level.SEVERE,
+        	        "Database error while finding user by username.",
+        	        e
+        	);
         }
 
         return null;
@@ -194,10 +201,11 @@ public class UserRepository {
 
         } catch (SQLException e) {
 
-            System.err.println(
-                    "Error finding user by ID: "
-                            + e.getMessage()
-            );
+        	LOGGER.log(
+        	        Level.SEVERE,
+        	        "Database error while finding user by ID.",
+        	        e
+        	);
         }
 
         return null;
@@ -228,10 +236,10 @@ public class UserRepository {
 
         if (user == null) {
 
-            System.out.println(
-                    "Authentication failed: "
-                            + "user not found."
-            );
+        	LOGGER.log(
+        	        Level.WARNING,
+        	        "Authentication failed: user not found."
+        	);
 
             return null;
         }
@@ -244,20 +252,21 @@ public class UserRepository {
 
         if (!validPassword) {
 
-            System.out.println(
-                    "Authentication failed: "
-                            + "incorrect password."
-            );
+        	LOGGER.log(
+        	        Level.WARNING,
+        	        "Authentication failed: incorrect password."
+        	);
 
             return null;
         }
 
-        System.out.println(
-                "Login successful: "
-                        + user.getUsername()
-                        + " ("
-                        + user.getRole()
-                        + ")"
+        LOGGER.log(
+                Level.INFO,
+                "Login successful for user ID {0}, role {1}.",
+                new Object[] {
+                        user.getId(),
+                        user.getRole()
+                }
         );
 
         return user;
@@ -311,17 +320,19 @@ public class UserRepository {
                 }
             }
 
-            System.out.println(
-                    "Technicians loaded: "
-                            + technicians.size()
+            LOGGER.log(
+                    Level.INFO,
+                    "Technicians loaded successfully. Count: {0}",
+                    technicians.size()
             );
 
         } catch (SQLException e) {
 
-            System.err.println(
-                    "Error loading technicians: "
-                            + e.getMessage()
-            );
+        	LOGGER.log(
+        	        Level.SEVERE,
+        	        "Database error while loading technicians.",
+        	        e
+        	);
         }
 
         return technicians;
@@ -380,10 +391,11 @@ public class UserRepository {
 
             if (generatedId > 0) {
 
-                System.out.println(
-                        "Default user created: "
-                                + user.getUsername()
-                );
+            	LOGGER.log(
+            	        Level.INFO,
+            	        "Default user created successfully. ID: {0}",
+            	        generatedId
+            	);
             }
 
         }
@@ -434,9 +446,9 @@ public class UserRepository {
 
         if (role == null) {
 
-            System.err.println(
-                    "Cannot create user: role is null."
-            );
+        	LOGGER.warning(
+        	        "Cannot create user: role is null."
+        	);
 
             return null;
         }
@@ -469,10 +481,11 @@ public class UserRepository {
 
             default -> {
 
-                System.err.println(
-                        "Unknown user role: "
-                                + role
-                );
+            	LOGGER.log(
+            	        Level.WARNING,
+            	        "Cannot create user: unknown role {0}.",
+            	        role
+            	); 
 
                 yield null;
             }

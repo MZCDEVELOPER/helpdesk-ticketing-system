@@ -11,8 +11,12 @@ import java.sql.Statement;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class TicketRepository {
+	private static final Logger LOGGER =
+	        Logger.getLogger(TicketRepository.class.getName());
 
     /**
      * Saves a new ticket.
@@ -97,8 +101,8 @@ public class TicketRepository {
 
             if (rowsInserted == 0) {
 
-                System.err.println(
-                        "Ticket creation failed."
+                LOGGER.warning(
+                        "Ticket creation failed. No rows were inserted."
                 );
 
                 return -1;
@@ -112,9 +116,10 @@ public class TicketRepository {
                     int generatedId =
                             generatedKeys.getInt(1);
 
-                    System.out.println(
-                            "Ticket saved successfully. ID: "
-                            + generatedId
+                    LOGGER.log(
+                            Level.INFO,
+                            "Ticket saved successfully. ID: {0}",
+                            generatedId
                     );
 
                     return generatedId;
@@ -123,11 +128,11 @@ public class TicketRepository {
 
         } catch (SQLException e) {
 
-            System.err.println(
-                    "Database error while saving ticket."
+            LOGGER.log(
+                    Level.SEVERE,
+                    "Database error while saving ticket.",
+                    e
             );
-
-            e.printStackTrace();
         }
 
         return -1;
@@ -179,13 +184,17 @@ public class TicketRepository {
                 );
             }
 
-            System.out.println(
-                    "Tickets loaded successfully."
+            LOGGER.log(
+                    Level.INFO,
+                    "Tickets loaded successfully. Count: {0}",
+                    tickets.size()
             );
         } catch (SQLException e) {
 
-            System.err.println(
-                    "Database error while loading tickets."
+            LOGGER.log(
+                    Level.SEVERE,
+                    "Database error while loading tickets.",
+                    e
             );
 
             throw new IllegalStateException(
@@ -253,8 +262,10 @@ public class TicketRepository {
 
         } catch (SQLException e) {
 
-            System.err.println(
-                    "Database error while loading tickets."
+            LOGGER.log(
+                    Level.SEVERE,
+                    "Database error while loading employee tickets.",
+                    e
             );
 
             throw new IllegalStateException(
@@ -346,25 +357,28 @@ public class TicketRepository {
 
             if (rowsUpdated > 0) {
 
-                System.out.println(
-                        "Ticket updated successfully."
-                );
+            	LOGGER.log(
+            	        Level.INFO,
+            	        "Ticket updated successfully. ID: {0}",
+            	        ticket.getId()
+            	);
 
                 return true;
             }
 
-            System.err.println(
-                    "Ticket update failed. "
-                    + "Ticket not found."
+            LOGGER.log(
+                    Level.WARNING,
+                    "Ticket update failed. Ticket ID {0} not found.",
+                    ticket.getId()
             );
 
         } catch (SQLException e) {
 
-            System.err.println(
-                    "Database error while updating ticket."
+            LOGGER.log(
+                    Level.SEVERE,
+                    "Database error while updating ticket.",
+                    e
             );
-
-            e.printStackTrace();
         }
 
         return false;
