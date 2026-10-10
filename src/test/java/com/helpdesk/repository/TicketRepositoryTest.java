@@ -263,6 +263,50 @@ class TicketRepositoryTest {
 
         // Verify all three tickets still exist in the database.
         assertEquals(3, repository.findAll().size());
+        
+    }
+    @Test 
+    void findByIdReturnsCorrectTicket() {
+
+        TicketRepository repository = new TicketRepository();
+
+        Ticket ticket = new Ticket(
+                0,
+                "Database Lookup Test",
+                "Testing ticket retrieval by ID",
+                "Hardware",
+                "Medium",
+                "Open",
+                1,
+                0
+        );
+
+        int ticketId = repository.save(ticket);
+
+        assertTrue(ticketId > 0);
+
+        Ticket retrievedTicket = repository.findById(ticketId);
+
+        assertNotNull(retrievedTicket);
+        assertEquals(ticketId, retrievedTicket.getId());
+        assertEquals("Database Lookup Test", retrievedTicket.getTitle());
+        assertEquals(1, retrievedTicket.getCreatedBy());
+    }
+    /*
+     * Test 6:
+     * A nonexistent ticket should return null.
+     */
+    @Test
+    void findByIdReturnsNullForNonexistentTicket() {
+
+        TicketRepository repository = new TicketRepository();
+
+        Ticket retrievedTicket = repository.findById(99999);
+
+        assertNull(
+                retrievedTicket,
+                "A nonexistent ticket should return null."
+        );
     }
 }
 

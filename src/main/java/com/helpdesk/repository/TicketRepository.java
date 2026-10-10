@@ -276,7 +276,57 @@ public class TicketRepository {
 
         return tickets;
     }
+    /**
+     * Retrieves a single ticket by its ID.
+     *
+     * Returns null when the ticket does not exist.
+     */
+    public Ticket findById(int ticketId) {
 
+        String sql = """
+                SELECT
+                    id,
+                    title,
+                    description,
+                    category,
+                    priority,
+                    status,
+                    created_by,
+                    assigned_to
+                FROM tickets
+                WHERE id = ?
+                """;
+
+        try (Connection connection = DatabaseManager.connect();
+             PreparedStatement statement =
+                     connection.prepareStatement(sql)) {
+
+            statement.setInt(1, ticketId);
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+
+                if (resultSet.next()) {
+
+                    return createTicketFromResultSet(resultSet);
+                }
+            }
+
+        } catch (SQLException e) {
+
+            LOGGER.log(
+                    Level.SEVERE,
+                    "Database error while finding ticket by ID.",
+                    e
+            );
+
+            throw new IllegalStateException(
+                    "Unable to retrieve ticket from the database.",
+                    e
+            );
+        }
+
+        return null;
+    }
     /**
      * Updates an existing ticket.
      *

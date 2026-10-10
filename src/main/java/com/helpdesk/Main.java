@@ -76,6 +76,8 @@ import com.helpdesk.validation.TicketValidator;
 
 import com.helpdesk.validation.TicketStatusValidator;
 
+import com.helpdesk.security.TicketAuthorization;
+
 public class Main extends Application {
 	private static final Logger LOGGER =
 	        Logger.getLogger(Main.class.getName());
@@ -164,11 +166,9 @@ public class Main extends Application {
                 new Label("Help Desk Ticketing System");
 
         applicationTitle.setStyle(
-
                 "-fx-font-size: 26px;"
-
                 + "-fx-font-weight: bold;"
-
+                + "-fx-text-fill: #17365d;"
         );
 
         Label loginTitle =
@@ -214,10 +214,29 @@ public class Main extends Application {
         );
 
         passwordField.setMaxWidth(250);
+        String loginInputStyle =
+                "-fx-font-size: 13px;"
+                + "-fx-background-color: white;"
+                + "-fx-background-radius: 6px;"
+                + "-fx-border-color: #cbd5e1;"
+                + "-fx-border-radius: 6px;"
+                + "-fx-padding: 8px 12px;";
+
+        usernameField.setStyle(loginInputStyle);
+        passwordField.setStyle(loginInputStyle);
 
         Button loginButton =
 
                 new Button("Login");
+        loginButton.setStyle(
+                "-fx-background-color: #17365d;"
+                + "-fx-text-fill: white;"
+                + "-fx-font-size: 13px;"
+                + "-fx-font-weight: bold;"
+                + "-fx-padding: 9px 24px;"
+                + "-fx-background-radius: 6px;"
+                + "-fx-cursor: hand;"
+        );
 
         loginButton.setDefaultButton(true);
 
@@ -300,6 +319,9 @@ public class Main extends Application {
         VBox loginBox =
 
                 new VBox(12);
+        loginBox.setStyle(
+                "-fx-background-color: #f4f7fb;"
+        );
 
         loginBox.setAlignment(
 
@@ -371,15 +393,24 @@ public class Main extends Application {
 
             List<Ticket> loadedTickets;
 
-            if (currentUser.getRole().equals("Employee")) {
+            String role = currentUser.getRole();
+
+            if ("Employee".equals(role)) {
 
                 loadedTickets = ticketRepository.findByCreatedBy(
                         currentUser.getId()
                 );
 
-            } else {
+            } else if ("Technician".equals(role)
+                    || "Administrator".equals(role)) {
 
                 loadedTickets = ticketRepository.findAll();
+
+            } else {
+
+                throw new SecurityException(
+                        "Unauthorized user role: access denied."
+                );
             }
 
             // Replace displayed tickets only after
@@ -406,28 +437,9 @@ public class Main extends Application {
     }
 
     /* Determines whether the current user can manage tickets */
-
     private boolean canManageTickets() {
 
-        if (currentUser == null) {
-
-            return false;
-
-        }
-
-        return currentUser
-
-                .getRole()
-
-                .equals("Technician")
-
-                ||
-
-                currentUser
-
-                        .getRole()
-
-                        .equals("Administrator");
+        return TicketAuthorization.canManageTickets(currentUser);
 
     }
 
@@ -444,6 +456,9 @@ public class Main extends Application {
                 new Insets(20)
 
         );
+        root.setStyle(
+        	    "-fx-background-color: #f4f7fb;"
+        	);
 
         Label titleLabel =
 
@@ -452,6 +467,8 @@ public class Main extends Application {
                         "Help Desk Ticketing System"
 
                 );
+        titleLabel.setMaxWidth(Double.MAX_VALUE);
+        titleLabel.setAlignment(Pos.CENTER);
 
         titleLabel.setStyle(
 
@@ -459,6 +476,15 @@ public class Main extends Application {
 
                 + "-fx-font-weight: bold;"
 
+        );
+        titleLabel.setMaxWidth(Double.MAX_VALUE);
+        titleLabel.setAlignment(Pos.CENTER);
+
+        titleLabel.setStyle(
+            "-fx-font-size: 26px;"
+            + "-fx-font-weight: bold;"
+            + "-fx-text-fill: #17365d;"
+            + "-fx-padding: 8px 0 12px 0;"
         );
 
         Label userLabel =
@@ -476,6 +502,11 @@ public class Main extends Application {
                         + ")"
 
                 );
+        userLabel.setStyle(
+                "-fx-font-size: 15px;"
+                + "-fx-font-weight: bold;"
+                + "-fx-text-fill: #334155;"
+        );
 
         Label permissionLabel =
 
@@ -520,6 +551,11 @@ public class Main extends Application {
             );
 
         }
+        permissionLabel.setStyle(
+                "-fx-font-size: 12px;"
+                + "-fx-text-fill: #64748b;"
+                + "-fx-padding: 0 0 6px 0;"
+        );
 
         Button createTicketButton =
 
@@ -589,7 +625,16 @@ public class Main extends Application {
 
         );
 
-        searchField.setPrefWidth(350);
+        searchField.setPrefWidth(300);
+
+        searchField.setStyle(
+            "-fx-font-size: 13px;"
+            + "-fx-padding: 8px 12px;"
+            + "-fx-background-color: white;"
+            + "-fx-border-color: #cbd5e1;"
+            + "-fx-border-radius: 6px;"
+            + "-fx-background-radius: 6px;"
+        );
         
         Label statusFilterLabel =
                 new Label("Status:");
@@ -608,7 +653,15 @@ public class Main extends Application {
         statusFilterBox.setValue(
                 "All Statuses"
         );
-        
+        statusFilterBox.setPrefWidth(150);
+
+        statusFilterBox.setStyle(
+                "-fx-font-size: 13px;"
+                + "-fx-background-color: white;"
+                + "-fx-border-color: #cbd5e1;"
+                + "-fx-border-radius: 6px;"
+                + "-fx-background-radius: 6px;"
+        );
         
 
         TableView<Ticket> ticketTable =
@@ -656,6 +709,15 @@ public class Main extends Application {
         priorityFilterBox.setValue(
                 "All Priorities"
         );
+        priorityFilterBox.setPrefWidth(150);
+
+        priorityFilterBox.setStyle(
+                "-fx-font-size: 13px;"
+                + "-fx-background-color: white;"
+                + "-fx-border-color: #cbd5e1;"
+                + "-fx-border-radius: 6px;"
+                + "-fx-background-radius: 6px;"
+        );
         
         Label categoryFilterLabel =
                 new Label("Category:");
@@ -675,6 +737,15 @@ public class Main extends Application {
 
         categoryFilterBox.setValue(
                 "All Categories"
+        );
+        categoryFilterBox.setPrefWidth(150);
+
+        categoryFilterBox.setStyle(
+                "-fx-font-size: 13px;"
+                + "-fx-background-color: white;"
+                + "-fx-border-color: #cbd5e1;"
+                + "-fx-border-radius: 6px;"
+                + "-fx-background-radius: 6px;"
         );
 
         TableColumn<Ticket, String> titleColumn =
@@ -851,6 +922,15 @@ public class Main extends Application {
 
                 filteredTickets
 
+        );
+     // Improve ticket table readability.
+        ticketTable.setFixedCellSize(34);
+
+        ticketTable.setStyle(
+            "-fx-font-size: 13px;"
+            + "-fx-background-color: white;"
+            + "-fx-border-color: #dce3eb;"
+            + "-fx-border-radius: 6px;"
         );
 
         searchField.textProperty().addListener(
@@ -1048,8 +1128,26 @@ public class Main extends Application {
         });
 
         HBox buttonBar =
-
-                new HBox(10);
+                new HBox(12);
+     // Make dashboard action buttons easier to read.
+        for (Button button : new Button[] {
+                createTicketButton,
+                updateTicketButton,
+                commentsButton,
+                clearSelectionButton,
+                refreshButton,
+                logoutButton
+        }) {
+        	button.setStyle(
+        	        "-fx-background-color: #17365d;"
+        	        + "-fx-text-fill: white;"
+        	        + "-fx-font-size: 13px;"
+        	        + "-fx-font-weight: bold;"
+        	        + "-fx-padding: 9px 16px;"
+        	        + "-fx-background-radius: 6px;"
+        	        + "-fx-cursor: hand;"
+        	);
+        }
 
         buttonBar.getChildren().addAll(
 
@@ -1094,6 +1192,28 @@ public class Main extends Application {
                         closedTicketsLabel
                 );
 
+statisticsBar.setSpacing(12);
+
+for (Label statisticLabel : new Label[] {
+        totalTicketsLabel,
+        openTicketsLabel,
+        inProgressTicketsLabel,
+        resolvedTicketsLabel,
+        closedTicketsLabel
+}) {
+    statisticLabel.setStyle(
+            "-fx-background-color: #f1f5f9;"
+            + "-fx-background-radius: 8px;"
+            + "-fx-border-color: #dce3eb;"
+            + "-fx-border-radius: 8px;"
+            + "-fx-padding: 12px 18px;"
+            + "-fx-font-size: 13px;"
+            + "-fx-font-weight: bold;"
+            + "-fx-text-fill: #334155;"
+    );
+}
+
+
         statisticsBar.setAlignment(
                 Pos.CENTER_LEFT
         );
@@ -1111,9 +1231,8 @@ public class Main extends Application {
 
 
 
-        VBox header =
-
-                new VBox(10);
+     VBox header =
+    	        new VBox(18);
 
         header.setPadding(
 
@@ -1160,15 +1279,10 @@ public class Main extends Application {
         );
 
         Scene dashboardScene =
-
                 new Scene(
-
                         root,
-
-                        1100,
-
-                        600
-
+                        1280,
+                        720
                 );
 
         primaryStage.setScene(
@@ -1220,6 +1334,14 @@ public class Main extends Application {
         descriptionArea.setPrefRowCount(4);
 
         descriptionArea.setWrapText(true);
+        String inputStyle =
+                "-fx-font-size: 13px;"
+                + "-fx-background-radius: 6px;"
+                + "-fx-border-color: #cbd5e1;"
+                + "-fx-border-radius: 6px;";
+
+        titleField.setStyle(inputStyle);
+        descriptionArea.setStyle(inputStyle);
 
         Label categoryLabel =
 
@@ -1250,6 +1372,9 @@ public class Main extends Application {
                 "Hardware"
 
         );
+        categoryBox.setStyle(inputStyle);
+        categoryBox.setPrefWidth(300);
+       
 
         Label priorityLabel =
 
@@ -1276,7 +1401,9 @@ public class Main extends Application {
                 "Medium"
 
         );
-
+        priorityBox.setStyle(inputStyle);
+        priorityBox.setPrefWidth(300);
+    
         Button submitButton =
 
                 new Button(
@@ -1284,6 +1411,15 @@ public class Main extends Application {
                         "Create Ticket"
 
                 );
+        submitButton.setStyle(
+                "-fx-background-color: #17365d;"
+                + "-fx-text-fill: white;"
+                + "-fx-font-size: 13px;"
+                + "-fx-font-weight: bold;"
+                + "-fx-padding: 9px 16px;"
+                + "-fx-background-radius: 6px;"
+                + "-fx-cursor: hand;"
+        );
 
         Button cancelButton =
 
@@ -1467,6 +1603,13 @@ public class Main extends Application {
                 new Insets(20)
 
         );
+        form.setStyle(
+                "-fx-background-color: #f4f7fb;"
+        );
+        form.getColumnConstraints().addAll(
+                new javafx.scene.layout.ColumnConstraints(110),
+                new javafx.scene.layout.ColumnConstraints(300)
+        );
 
         form.setHgap(10);
 
@@ -1578,9 +1721,9 @@ public class Main extends Application {
 
                         form,
 
-                        500,
+                        520,
 
-                        350
+                        380
 
                 );
 
@@ -1676,6 +1819,15 @@ public class Main extends Application {
 
         descriptionArea.setWrapText(true);
 
+        String inputStyle =
+                "-fx-font-size: 13px;"
+                + "-fx-background-radius: 6px;"
+                + "-fx-border-color: #cbd5e1;"
+                + "-fx-border-radius: 6px;";
+
+        titleField.setStyle(inputStyle);
+        descriptionArea.setStyle(inputStyle);
+
         Label categoryLabel =
 
                 new Label("Category:");
@@ -1699,6 +1851,7 @@ public class Main extends Application {
                 "Other"
 
         );
+        
 
         categoryBox.setValue(
 
@@ -1768,6 +1921,17 @@ public class Main extends Application {
 
         ComboBox<User> technicianBox =
                 new ComboBox<>();
+        categoryBox.setStyle(inputStyle);
+        categoryBox.setPrefWidth(300);
+
+        priorityBox.setStyle(inputStyle);
+        priorityBox.setPrefWidth(300);
+
+        statusBox.setStyle(inputStyle);
+        statusBox.setPrefWidth(300);
+
+        technicianBox.setStyle(inputStyle);
+        technicianBox.setPrefWidth(300);
 
         List<User> technicians;
 
@@ -1890,6 +2054,15 @@ public class Main extends Application {
                         "Save Changes"
 
                 );
+        saveButton.setStyle(
+                "-fx-background-color: #17365d;"
+                + "-fx-text-fill: white;"
+                + "-fx-font-size: 13px;"
+                + "-fx-font-weight: bold;"
+                + "-fx-padding: 9px 16px;"
+                + "-fx-background-radius: 6px;"
+                + "-fx-cursor: hand;"
+        );
 
         Button cancelButton =
 
@@ -2156,6 +2329,13 @@ public class Main extends Application {
                 new Insets(20)
 
         );
+        form.setStyle(
+                "-fx-background-color: #f4f7fb;"
+        );
+        form.getColumnConstraints().addAll(
+                new javafx.scene.layout.ColumnConstraints(150),
+                new javafx.scene.layout.ColumnConstraints(300)
+        );
 
         form.setHgap(10);
 
@@ -2337,9 +2517,9 @@ public class Main extends Application {
 
                         form,
 
-                        650,
+                        520,
 
-                        475
+                        380
 
                 );
 
@@ -2358,6 +2538,59 @@ public class Main extends Application {
     private void showTicketDetailsWindow(
 
             Ticket ticket) {
+    	// Verify that a user is authenticated.
+    	if (currentUser == null || ticket == null) {
+
+    	    showAlert(
+    	            Alert.AlertType.ERROR,
+    	            "Access Denied",
+    	            "Unable to open ticket",
+    	            "You must be logged in to view ticket details."
+    	    );
+
+    	    return;
+    	}
+    	// Retrieve the current ticket directly from SQLite.
+Ticket storedTicket;
+
+try {
+    storedTicket = ticketRepository.findById(ticket.getId());
+} catch (IllegalStateException e) {
+
+    showAlert(
+            Alert.AlertType.ERROR,
+            "Database Error",
+            "Unable to verify ticket permissions",
+            "Please try again."
+    );
+
+    return;
+}
+
+if (storedTicket == null) {
+
+    showAlert(
+            Alert.AlertType.ERROR,
+            "Ticket Not Found",
+            "The selected ticket no longer exists.",
+            "Please refresh the dashboard."
+    );
+
+    return;
+}
+
+//Verify that the user has permission to view this ticket.
+if (!TicketAuthorization.canViewTicket(currentUser, storedTicket)) {
+
+ showAlert(
+         Alert.AlertType.ERROR,
+         "Access Denied",
+         "Insufficient permissions",
+         "You do not have permission to view this ticket."
+ );
+
+ return;
+}
 
         Stage detailsStage =
 
@@ -2388,12 +2621,12 @@ public class Main extends Application {
                 );
 
         headingLabel.setStyle(
-
-                "-fx-font-size: 20px;"
-
+                "-fx-font-size: 22px;"
                 + "-fx-font-weight: bold;"
-
+                + "-fx-text-fill: #17365d;"
+                + "-fx-padding: 0 0 8px 0;"
         );
+        headingLabel.setWrapText(true);
 
         String createdByText =
 
@@ -2464,15 +2697,28 @@ public class Main extends Application {
                         + assignedToText
 
                 );
+        String detailStyle =
+                "-fx-font-size: 13px;"
+                + "-fx-text-fill: #334155;";
+
+        for (Label label : new Label[] {
+                categoryLabel,
+                priorityLabel,
+                statusLabel,
+                createdByLabel,
+                assignedToLabel
+        }) {
+            label.setStyle(detailStyle);
+        }
 
         Label descriptionTitle =
 
                 new Label("Description");
 
         descriptionTitle.setStyle(
-
-                "-fx-font-weight: bold;"
-
+                "-fx-font-size: 16px;"
+                + "-fx-font-weight: bold;"
+                + "-fx-text-fill: #17365d;"
         );
 
         TextArea descriptionArea =
@@ -2488,19 +2734,23 @@ public class Main extends Application {
         descriptionArea.setWrapText(true);
 
         descriptionArea.setPrefRowCount(4);
+        descriptionArea.setStyle(
+                "-fx-font-size: 13px;"
+                + "-fx-background-radius: 6px;"
+                + "-fx-border-color: #cbd5e1;"
+                + "-fx-border-radius: 6px;"
+        );
+        descriptionArea.setFocusTraversable(false);
 
         Label commentsTitle =
 
                 new Label("Comments");
 
         commentsTitle.setStyle(
-
                 "-fx-font-size: 16px;"
-
                 + "-fx-font-weight: bold;"
-
+                + "-fx-text-fill: #17365d;"
         );
-
         VBox commentsBox =
 
                 new VBox(10);
@@ -2509,6 +2759,9 @@ public class Main extends Application {
 
                 new Insets(10)
 
+        );
+        commentsBox.setStyle(
+                "-fx-background-color: white;"
         );
 
         refreshComments(
@@ -2530,6 +2783,12 @@ public class Main extends Application {
         commentsScrollPane.setFitToWidth(true);
 
         commentsScrollPane.setPrefHeight(250);
+        commentsScrollPane.setStyle(
+                "-fx-background-color: white;"
+                + "-fx-border-color: #dce3eb;"
+                + "-fx-border-radius: 6px;"
+                + "-fx-background-radius: 6px;"
+        );
 
         TextArea commentArea =
 
@@ -2544,7 +2803,17 @@ public class Main extends Application {
         commentArea.setWrapText(true);
 
         commentArea.setPrefRowCount(3);
+        commentArea.setStyle(
+                "-fx-font-size: 13px;"
+                + "-fx-background-radius: 6px;"
+                + "-fx-border-color: #cbd5e1;"
+                + "-fx-border-radius: 6px;"
+        );
         Label commentCounter = new Label("0 / 2000 characters");
+        commentCounter.setStyle(
+                "-fx-font-size: 12px;"
+                + "-fx-text-fill: #64748b;"
+        );
 
         commentArea.textProperty().addListener(
                 (observable, oldValue, newValue) -> {
@@ -2579,6 +2848,24 @@ public class Main extends Application {
                         "Close"
 
                 );
+        addCommentButton.setStyle(
+                "-fx-background-color: #17365d;"
+                + "-fx-text-fill: white;"
+                + "-fx-font-size: 13px;"
+                + "-fx-font-weight: bold;"
+                + "-fx-padding: 9px 16px;"
+                + "-fx-background-radius: 6px;"
+                + "-fx-cursor: hand;"
+        );
+
+        closeButton.setStyle(
+                "-fx-background-color: #e2e8f0;"
+                + "-fx-text-fill: #334155;"
+                + "-fx-font-size: 13px;"
+                + "-fx-padding: 9px 16px;"
+                + "-fx-background-radius: 6px;"
+                + "-fx-cursor: hand;"
+        );
 
         addCommentButton.setOnAction(event -> {
 
@@ -2638,6 +2925,49 @@ public class Main extends Application {
 
                 return;
 
+            }
+         // Verify ticket ownership against SQLite before saving.
+            Ticket currentTicket;
+
+            try {
+                currentTicket = ticketRepository.findById(ticket.getId());
+            } catch (IllegalStateException e) {
+
+                showAlert(
+                        Alert.AlertType.ERROR,
+                        "Database Error",
+                        "Unable to verify comment permissions",
+                        "Please try again."
+                );
+
+                return;
+            }
+
+            if (currentTicket == null) {
+
+                showAlert(
+                        Alert.AlertType.ERROR,
+                        "Ticket Not Found",
+                        "This ticket no longer exists.",
+                        "Please refresh the dashboard."
+                );
+
+                return;
+            }
+
+         // Verify comment permissions using the current database record.
+            if (!TicketAuthorization.canCommentOnTicket(
+                    currentUser,
+                    currentTicket)) {
+
+                showAlert(
+                        Alert.AlertType.ERROR,
+                        "Access Denied",
+                        "Comment permission denied",
+                        "You do not have permission to comment on this ticket."
+                );
+
+                return;
             }
 
             TicketComment comment =
@@ -2719,6 +3049,9 @@ public class Main extends Application {
         VBox root =
 
                 new VBox(12);
+        root.setStyle(
+                "-fx-background-color: #f4f7fb;"
+        );
 
         root.setPadding(
 
@@ -2760,9 +3093,9 @@ public class Main extends Application {
 
                         root,
 
-                        700,
+                        760,
 
-                        750
+                        780
 
                 );
 
@@ -2866,9 +3199,9 @@ public class Main extends Application {
                     );
 
             authorLabel.setStyle(
-
-                    "-fx-font-weight: bold;"
-
+                    "-fx-font-size: 13px;"
+                    + "-fx-font-weight: bold;"
+                    + "-fx-text-fill: #17365d;"
             );
 
             Label dateLabel =
@@ -2882,6 +3215,10 @@ public class Main extends Application {
                                     .format(formatter)
 
                     );
+            dateLabel.setStyle(
+                    "-fx-font-size: 11px;"
+                    + "-fx-text-fill: #64748b;"
+            );
 
             TextArea commentText =
 
@@ -2896,6 +3233,13 @@ public class Main extends Application {
             commentText.setWrapText(true);
 
             commentText.setPrefRowCount(2);
+            commentText.setStyle(
+                    "-fx-font-size: 13px;"
+                    + "-fx-background-color: white;"
+                    + "-fx-border-color: #e2e8f0;"
+                    + "-fx-border-radius: 4px;"
+            );
+            commentText.setFocusTraversable(false);
 
             VBox commentCard =
 
@@ -2913,18 +3257,15 @@ public class Main extends Application {
 
             commentCard.setPadding(
 
-                    new Insets(8)
+                    new Insets(12)
 
             );
 
             commentCard.setStyle(
-
-                    "-fx-border-color: lightgray;"
-
-                    + "-fx-border-radius: 4;"
-
-                    + "-fx-background-radius: 4;"
-
+                    "-fx-background-color: #f8fafc;"
+                    + "-fx-border-color: #dce3eb;"
+                    + "-fx-border-radius: 8px;"
+                    + "-fx-background-radius: 8px;"
             );
 
             commentsBox
