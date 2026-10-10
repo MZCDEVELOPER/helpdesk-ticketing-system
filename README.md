@@ -101,6 +101,20 @@ clean test
 
 The current test suite contains 44 passing tests.
 
+## Screenshots
+
+### Login Screen
+![Login Screen](screenshots/login.png)
+
+### Technician Dashboard
+![Technician Dashboard](screenshots/dashboard.png)
+
+### Create Ticket
+![Create Ticket](screenshots/create-ticket.png)
+
+### Ticket Details and Comments
+![Ticket Details](screenshots/ticket-details.png)
+
 ## Author
 
 Matthew Z Cruse
