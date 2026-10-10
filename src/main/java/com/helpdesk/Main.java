@@ -72,6 +72,10 @@ import javafx.stage.Stage;
 
 import javafx.util.StringConverter;
 
+import com.helpdesk.validation.TicketValidator;
+
+import com.helpdesk.validation.TicketStatusValidator;
+
 public class Main extends Application {
 	private static final Logger LOGGER =
 	        Logger.getLogger(Main.class.getName());
@@ -1338,8 +1342,7 @@ public class Main extends Application {
             }
             
          // Validate ticket title length.
-            if (title.length() < 3
-                    || title.length() > 100) {
+            if (!TicketValidator.isValidTitle(title)) { 
 
                 showAlert(
                         Alert.AlertType.WARNING,
@@ -1353,8 +1356,7 @@ public class Main extends Application {
 
 
             // Validate ticket description length.
-            if (description.length() < 10
-                    || description.length() > 1000) {
+            if (!TicketValidator.isValidDescription(description)) {
 
                 showAlert(
                         Alert.AlertType.WARNING,
@@ -1970,7 +1972,7 @@ public class Main extends Application {
             }
             
          // Validate ticket title length.
-            if (title.length() < 3 || title.length() > 100) {
+            if (!TicketValidator.isValidTitle(title)) {
 
                 showAlert(
                         Alert.AlertType.WARNING,
@@ -1983,7 +1985,7 @@ public class Main extends Application {
             }
 
             // Validate ticket description length.
-            if (description.length() < 10 || description.length() > 1000) {
+            if (!TicketValidator.isValidDescription(description)) {
 
                 showAlert(
                         Alert.AlertType.WARNING,
@@ -1995,10 +1997,8 @@ public class Main extends Application {
                 return;
             }
 
-            if (!isValidStatusTransition(
-
+            if (!TicketStatusValidator.isValidStatusTransition(
                     ticket.getStatus(),
-
                     status)) {
 
                 showAlert(
@@ -2977,69 +2977,6 @@ public class Main extends Application {
             return "Unavailable";
         }
     }
-
-    /*  Enforces the ticket state machine */
-
-    private boolean isValidStatusTransition(
-
-            String currentStatus,
-
-            String newStatus) {
-
-        if (currentStatus.equals(
-
-                newStatus)) {
-
-            return true;
-
-        }
-
-        return switch (currentStatus) {
-
-            case "Open" ->
-
-                    newStatus.equals(
-
-                            "In Progress"
-
-                    );
-
-            case "In Progress" ->
-
-                    newStatus.equals(
-
-                            "Resolved"
-
-                    );
-
-            case "Resolved" ->
-
-                    newStatus.equals(
-
-                            "Closed"
-
-                    )
-
-                    ||
-
-                    newStatus.equals(
-
-                            "In Progress"
-
-                    );
-
-            case "Closed" ->
-
-                    false;
-
-            default ->
-
-                    false;
-
-        };
-
-    }
-    
     /**
      * Updates the ticket statistics displayed
      * on the dashboard.

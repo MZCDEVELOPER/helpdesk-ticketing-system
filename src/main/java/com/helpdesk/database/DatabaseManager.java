@@ -12,19 +12,27 @@ public class DatabaseManager {
 	private static final Logger LOGGER =
 	        Logger.getLogger(DatabaseManager.class.getName());
 
-    private static final String DB_URL =
-            "jdbc:sqlite:helpdesk.db";
+	private static final String DEFAULT_DB_URL =
+	        "jdbc:sqlite:helpdesk.db";
+
+	private static final String DB_URL_PROPERTY =
+	        "helpdesk.db.url";
 
     /*
      * Creates and returns a connection to the database.
      *
      * TicketRepository and UserRepository use this method.
      */
-    public static Connection connect()
-            throws SQLException {
+	public static Connection connect()
+	        throws SQLException {
 
-        return DriverManager.getConnection(DB_URL);
-    }
+	    String databaseUrl = System.getProperty(
+	            DB_URL_PROPERTY,
+	            DEFAULT_DB_URL
+	    );
+
+	    return DriverManager.getConnection(databaseUrl);
+	}
 
     /*
      * Also returns a database connection.
